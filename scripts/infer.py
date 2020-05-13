@@ -28,14 +28,17 @@ def parse_args():
     parser.add_argument('--checkpoint', type=str, help='Checkpoint (.ckpt)')
     parser.add_argument('--input', type=str, help='Input file or folder')
     parser.add_argument('--output', type=str, help='Output file or foler')
-    parser.add_argument('--image_shape', type=tuple, default=None,
+    parser.add_argument('--h', type=int, default=None,
+                        help='Input and output image shape '
+                             '(default: checkpoint\'s config.datasets.augmentation.image_shape)')
+    parser.add_argument('--w', type=int, default=None,
                         help='Input and output image shape '
                              '(default: checkpoint\'s config.datasets.augmentation.image_shape)')
     args = parser.parse_args()
     assert args.checkpoint.endswith('.ckpt'), \
         'You need to provide a .ckpt file as checkpoint'
-    assert args.image_shape is None or len(args.image_shape) == 2, \
-        'You need to provide a 2-dimensional tuple as shape (H,W)'
+    #assert args.image_shape is None or len(args.image_shape) == 2, \
+    #    'You need to provide a 2-dimensional tuple as shape (H,W)'
     assert (is_image(args.input) and is_image(args.output)) or \
            (not is_image(args.input) and not is_image(args.input)), \
         'Input and output must both be images or folders'
@@ -131,7 +134,7 @@ def infer(ckpt_file, input_file, output_file, image_shape):
     if os.path.isdir(input_file):
         # If input file is a folder, search for image files
         files = []
-        for ext in ['png', 'jpg']:
+        for ext in ['png', 'jpg', 'jpeg']:
             files.extend(glob((os.path.join(input_file, '*.{}'.format(ext)))))
         files.sort()
         print0('Found {} files'.format(len(files)))
@@ -146,4 +149,4 @@ def infer(ckpt_file, input_file, output_file, image_shape):
 
 if __name__ == '__main__':
     args = parse_args()
-    infer(args.checkpoint, args.input, args.output, args.image_shape)
+    infer(args.checkpoint, args.input, args.output, (args.h, args.w) )
